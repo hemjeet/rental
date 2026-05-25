@@ -275,6 +275,7 @@ button { font-family: var(--font-sans); cursor: pointer; transition: all 0.2s ea
     <button class="tab" onclick="switchTab('t-profile',this)" style="flex:1;padding:10px;border:none;background:transparent;color:var(--color-text-secondary);border-radius:8px;font-weight:600;cursor:pointer"><i class="ti ti-user"></i> Profile</button>
   </div>
 
+  <div id="t-dashboard" class="section active">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
     <div>
       <div style="font-size:18px;font-weight:500;color:var(--color-text-primary)">Welcome, <span id="t-name">...</span></div>
@@ -299,6 +300,7 @@ button { font-family: var(--font-sans); cursor: pointer; transition: all 0.2s ea
 
   </div>
 
+  </div>
   <div id="t-profile" class="section" style="display:none">
     <div class="card" style="background:white;border-radius:var(--border-radius-lg);padding:1.5rem;box-shadow:var(--shadow-sm);border:1px solid var(--color-border)">
       <h3 style="margin-bottom:1rem;color:var(--color-text-primary)">Lease Details</h3>
@@ -453,6 +455,18 @@ auth.onAuthStateChanged(user => {
       if (!snap.empty) {
         myShop = {id: snap.docs[0].id, ...snap.docs[0].data()};
         document.getElementById('t-name').textContent = myShop.tenant;
+        
+        // Populate profile correctly
+        document.getElementById('prof-tenant').textContent = myShop.tenant || '-';
+        document.getElementById('prof-phone').textContent = myShop.phone || '-';
+        document.getElementById('prof-rent').textContent = fmt(myShop.rent);
+        document.getElementById('prof-due').textContent = myShop.dueDay + ' of every month';
+        if(myShop.doc) {
+          document.getElementById('prof-doc-img').src = myShop.doc;
+          document.getElementById('prof-doc-container').style.display = 'block';
+        } else {
+          document.getElementById('prof-doc-container').style.display = 'none';
+        }
         document.getElementById('t-due').textContent = `Due Date: ${myShop.dueDay}th of the month`;
         
         // Fetch my payments

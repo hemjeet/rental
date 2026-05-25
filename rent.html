@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0F6E56">
+    <title>Rent Manager</title>
+    <style>
+        :root {
+            --green: #1D9E75;
+            --green-dark: #0F6E56;
+            --green-light: #E1F5EE;
+            --green-text: #085041;
+            --amber-light: #FFFBEB;
+            --red: #EF4444;
+            --red-light: #FEF2F2;
+            --wa: #25D366;
+            --gray-50: #F9FAFB;
+            --gray-200: #E5E7EB;
+            --gray-400: #9CA3AF;
+            --gray-600: #4B5563;
+            --gray-900: #111827;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, 'Segoe UI', sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: var(--green-dark);
+            color: white;
+            padding: 16px 16px 14px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: .75;
+            margin-top: 2px;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, .15);
+            border: none;
+            color: white;
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            z-index: 50;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0 8px;
+            cursor: pointer;
+            color: var(--gray-400);
+            font-size: 10px;
+            gap: 4px;
+            border: none;
+            background: none;
+        }
+
+        .nav-item.active {
+            color: var(--green);
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .page {
+            display: none;
+            padding: 16px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 14px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--gray-400);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .stat-value.green {
+            color: var(--green);
+        }
+
+        .stat-value.red {
+            color: var(--red);
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        .shop-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform .1s;
+        }
+
+        .shop-card:active {
+            transform: scale(.98);
+        }
+
+        .shop-card-inner {
+            padding: 14px;
+        }
+
+        .shop-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .shop-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .shop-tenant {
+            font-size: 13px;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+
+        .shop-rent {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .shop-due {
+            font-size: 11px;
+            color: var(--gray-400);
+            margin-top: 2px;
+            text-align: right;
+        }
+
+        .shop-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .badge.paid {
+            background: var(--green-light);
+            color: var(--green-text);
+        }
+
+        .badge.due {
+            background: var(--amber-light);
+            color: #92400E;
+        }
+
+        .badge.overdue {
+            background: var(--red-light);
+            color: #991B1B;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity .15s;
+        }
+
+        .btn:active {
+            opacity: .8;
+        }
+
+        .btn-primary {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--gray-900);
+            border: 1.5px solid var(--gray-200);
+        }
+
+        .btn-danger {
+            background: var(--red-light);
+            color: var(--red);
+            border: none;
+        }
+
+        .btn-wa {
+            background: var(--wa);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 7px 12px;
+            font-size: 12px;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 84px;
+            right: 16px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--green);
+            color: white;
+            border: none;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(29, 158, 117, .35);
+            z-index: 40;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 100;
+            align-items: flex-end;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 16px 32px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-handle {
+            width: 36px;
+            height: 4px;
+            background: var(--gray-200);
+            border-radius: 2px;
+            margin: 0 auto 16px;
+        }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--gray-900);
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--green);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            padding: 13px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--green);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            margin-bottom: 16px;
+        }
+
+        .detail-hero {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .detail-name {
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .detail-sub {
+            font-size: 13px;
+            color: var(--gray-400);
+            margin-top: 3px;
+        }
+
+        .detail-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .detail-stat {
+            background: var(--gray-50);
+            border-radius: var(--radius-sm);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .detail-stat-val {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .detail-stat-label {
+            font-size: 10px;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+
+        .pay-item {
+            background: white;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-200);
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pay-month {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .pay-date {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+
+        .pay-amount {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .delete-pay {
+            background: none;
+            border: none;
+            color: var(--gray-400);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .month-group {
+            margin-bottom: 20px;
+        }
+
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .month-name {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .month-total {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--green);
+        }
+
+        .history-item {
+            background: white;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-200);
+            padding: 12px 14px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-wrap {
+            position: relative;
+            margin-bottom: 14px;
+        }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--gray-400);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 11px 14px 11px 38px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--green);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray-400);
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: var(--amber-light);
+            border: 1px solid #FDE68A;
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-size: 12px;
+            color: #92400E;
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+        
+        .settings-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .settings-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        .settings-item-info h3 {
+            font-size: 15px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .settings-item-info p {
+            font-size: 13px;
+            color: var(--gray-400);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-inner">
+            <div>
+                <h1>Rent Manager</h1>
+                <p id="header-sub">Loading...</p>
+            </div>
+            <button class="header-btn" onclick="exportCSV()">Export CSV</button>
+        </div>
+    </div>
+    
+    <div class="page active" id="page-dashboard"></div>
+    <div class="page" id="page-shops"></div>
+    <div class="page" id="page-history"></div>
+    <div class="page" id="page-settings">
+        <div class="section-title" style="margin-top: 0;">Data & Backup</div>
+        <div class="settings-card">
+            <div class="settings-item">
+                <div class="settings-item-info">
+                    <h3>Backup Data</h3>
+                    <p>Export all your data to a JSON file.</p>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="exportJSON()">Export JSON</button>
+            </div>
+            <div class="settings-item">
+                <div class="settings-item-info">
+                    <h3>Restore Data</h3>
+                    <p>Import from a previous JSON backup.</p>
+                </div>
+                <label class="btn btn-outline btn-sm" style="margin:0; cursor:pointer;">
+                    Import JSON
+                    <input type="file" style="display:none;" accept=".json" onchange="importJSON(event)">
+                </label>
+            </div>
+        </div>
+    </div>
+    
+    <button class="fab" id="fab" onclick="openAddShop()">+</button>
+    
+    <nav class="bottom-nav">
+        <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            Dashboard
+        </button>
+        <button class="nav-item" id="nav-shops" onclick="showPage('shops')">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Shops
+        </button>
+        <button class="nav-item" id="nav-history" onclick="showPage('history')">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M12 8v4l3 3" />
+                <circle cx="12" cy="12" r="9" />
+            </svg>
+            History
+        </button>
+        <button class="nav-item" id="nav-settings" onclick="showPage('settings')">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <circle cx="12" cy="12" r="3" />
+            </svg>
+            Settings
+        </button>
+    </nav>
+    
+    <!-- Add/Edit Shop Modal -->
+    <div class="modal-overlay" id="modal-shop">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-title" id="modal-shop-title">Add Shop</div>
+            
+            <div class="form-group">
+                <label class="form-label">Shop name *</label>
+                <input class="form-input" id="f-name" placeholder="e.g. Shop 1 - Main Market">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tenant name</label>
+                <input class="form-input" id="f-tenant" placeholder="Who rents this shop?">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone number (with country code)</label>
+                <input class="form-input" id="f-phone" type="tel" placeholder="e.g. 919876543210">
+                <div style="font-size:11px;color:var(--gray-400);margin-top:4px;">India: start with 91 then the 10-digit number. No + or spaces.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Monthly rent (₹)</label>
+                <input class="form-input" id="f-rent" type="number" placeholder="15000">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Lease Start</label>
+                    <input class="form-input" id="f-lease-start" type="date">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lease End</label>
+                    <input class="form-input" id="f-lease-end" type="date">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Security Deposit (₹)</label>
+                <input class="form-input" id="f-deposit" type="number" placeholder="50000">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tenant Notes</label>
+                <textarea class="form-input" id="f-notes" rows="2" style="resize:vertical;font-family:inherit;" placeholder="Reliable payer, issues..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">ID Document / Photo (Optional)</label>
+                <input class="form-input" type="file" accept="image/*" id="f-photo-input" onchange="handlePhotoUpload(event)">
+                <img id="id-photo-preview" style="display:none; width:100%; max-height:150px; object-fit:contain; margin-top:10px; border-radius:var(--radius-sm); border: 1px solid var(--gray-200);">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('modal-shop')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveShop()">Save Shop</button>
+            </div>
+            <button class="btn btn-danger btn-full" id="delete-shop-btn" style="margin-top:10px;display:none;" onclick="deleteShop()">Delete Shop</button>
+        </div>
+    </div>
+    
+    <!-- Mark Paid Modal -->
+    <div class="modal-overlay" id="modal-payment">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-title">Record Payment</div>
+            <div id="modal-payment-shop" style="font-size:14px;color:var(--gray-400);margin-bottom:16px;margin-top:-12px;"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Month (YYYY-MM)</label>
+                    <input class="form-input" id="p-month">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount (₹)</label>
+                    <input class="form-input" id="p-amount" type="number">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Payment date</label>
+                <input class="form-input" id="p-date" type="date">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Note (optional)</label>
+                <input class="form-input" id="p-note" placeholder="e.g. cash, bank transfer...">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('modal-payment')">Cancel</button>
+                <button class="btn btn-primary" onclick="savePayment()">Save</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- WhatsApp Reminder Modal -->
+    <div class="modal-overlay" id="modal-wa">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-title">Send WhatsApp Reminder</div>
+            <div id="wa-shop-info" style="font-size:13px;color:var(--gray-400);margin-bottom:14px;margin-top:-12px;"></div>
+            <div class="info-box">You can edit the message before sending. Tap "Open WhatsApp" and it will open directly in WhatsApp.</div>
+            <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea class="form-input" id="wa-message" rows="7" style="resize:none;line-height:1.6;"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('modal-wa')">Cancel</button>
+                <button class="btn btn-wa" onclick="sendWA()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
+                    </svg>
+                    Open WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Receipt Modal -->
+    <div class="modal-overlay" id="modal-receipt">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-title">Rent Receipt</div>
+            <img id="receipt-preview" style="width:100%; border-radius:var(--radius-sm); border:1px solid var(--gray-200); margin-bottom: 16px;">
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('modal-receipt')">Close</button>
+                <button class="btn btn-primary" id="btn-download-receipt">Download Image</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        var data = { shops: [], payments: [], nextId: 1, lastBackupDate: null };
+        var editingShopId = null, payingShopId = null, waShopId = null, currentPage = 'dashboard', searchTerm = '';
+        var currentIdPhotoBase64 = null;
+
+        function loadData() {
+            try {
+                var r = localStorage.getItem('rent_mgr_v2');
+                if (r) {
+                    var parsed = JSON.parse(r);
+                    if (parsed.shops) data.shops = parsed.shops;
+                    if (parsed.payments) data.payments = parsed.payments;
+                    if (parsed.nextId) data.nextId = parsed.nextId;
+                    if (parsed.lastBackupDate) data.lastBackupDate = parsed.lastBackupDate;
+                }
+            } catch (e) { console.error('Error loading data', e); }
+        }
+        
+        function saveData() {
+            localStorage.setItem('rent_mgr_v2', JSON.stringify(data));
+        }
+        
+        function getCurrentMonth() {
+            var n = new Date();
+            return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0');
+        }
+        
+        function getPaymentStatus(shopId) {
+            var cm = getCurrentMonth();
+            if (data.payments.find(p => p.shopId === shopId && p.month === cm)) return 'paid';
+            return new Date().getDate() > 4 ? 'overdue' : 'due';
+        }
+        
+        function fmtMoney(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+        
+        function monthLabel(ym) {
+            var p = ym.split('-');
+            return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parseInt(p[1]) - 1] + ' ' + p[0];
+        }
+        
+        function monthFull(ym) {
+            var p = ym.split('-');
+            return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][parseInt(p[1]) - 1] + ' ' + p[0];
+        }
+
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            var pageEl = document.getElementById('page-' + page);
+            if (pageEl) pageEl.classList.add('active');
+            var navEl = document.getElementById('nav-' + page);
+            if (navEl) navEl.classList.add('active');
+            document.getElementById('fab').style.display = (page === 'shops' || page === 'dashboard') ? 'flex' : 'none';
+            currentPage = page;
+            renderPage(page);
+        }
+        
+        function renderPage(page) {
+            if (page === 'dashboard') renderDashboard();
+            else if (page === 'shops') renderShops();
+            else if (page === 'history') renderHistory();
+            // settings requires no render right now
+        }
+
+        function waBtn(shopId) {
+            return `<button class="btn btn-wa btn-sm" onclick="event.stopPropagation();openWA(${shopId})">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg> 
+                Remind
+            </button>`;
+        }
+
+
+        function generateReceipt(paymentId) {
+            var p = data.payments.find(x => x.id === paymentId);
+            if (!p) return;
+            var sh = data.shops.find(x => x.id === p.shopId);
+            if (!sh) return;
+            
+            var canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 800;
+            var ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 600, 800);
+            
+            // Header
+            ctx.fillStyle = '#0F6E56';
+            ctx.fillRect(0, 0, 600, 120);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 36px Arial';
+            ctx.fillText('RENT RECEIPT', 30, 75);
+            
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'right';
+            ctx.fillText('Date: ' + (p.paidDate || ''), 570, 70);
+            
+            // Content
+            ctx.fillStyle = '#111827';
+            ctx.textAlign = 'left';
+            
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText(sh.name, 40, 180);
+            
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#4B5563';
+            ctx.fillText('Tenant: ' + (sh.tenant || 'N/A'), 40, 215);
+            
+            // Amount box
+            ctx.fillStyle = '#E1F5EE';
+            ctx.fillRect(40, 260, 520, 100);
+            
+            ctx.fillStyle = '#0F6E56';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('₹' + Number(p.amount).toLocaleString('en-IN'), 300, 325);
+            
+            // Details
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#111827';
+            
+            ctx.font = '18px Arial';
+            ctx.fillText('Payment for Month: ', 40, 420);
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(monthFull(p.month), 220, 420);
+            
+            ctx.font = '18px Arial';
+            ctx.fillText('Note: ', 40, 460);
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(p.note || '-', 220, 460);
+            
+            // Footer
+            ctx.strokeStyle = '#E5E7EB';
+            ctx.beginPath();
+            ctx.moveTo(40, 600);
+            ctx.lineTo(560, 600);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#9CA3AF';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Generated by Rent Manager App', 300, 750);
+            
+            // Show Modal
+            var dataUrl = canvas.toDataURL('image/png');
+            document.getElementById('receipt-preview').src = dataUrl;
+            
+            var btn = document.getElementById('btn-download-receipt');
+            btn.onclick = function() {
+                var a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = 'Receipt_' + sh.name.replace(/\s+/g, '_') + '_' + p.month + '.png';
+                a.click();
+            };
+            
+            document.getElementById('modal-receipt').classList.add('open');
+        }
+        function renderDashboard() {
+            var cm = getCurrentMonth();
+            var totalRent = data.shops.reduce((s, sh) => s + (sh.rent || 0), 0);
+            var collected = data.payments.filter(p => p.month === cm).reduce((s, p) => s + (p.amount || 0), 0);
+            var pending = data.shops.filter(sh => getPaymentStatus(sh.id) !== 'paid');
+            var pct = totalRent > 0 ? Math.round((collected / totalRent) * 100) : 0;
+            
+            document.getElementById('header-sub').textContent = monthLabel(cm) + ' · Due: 1st of every month';
+            
+            var backupWarningHTML = '';
+            if (!data.lastBackupDate) {
+                backupWarningHTML = `<div class="info-box" style="margin-bottom: 16px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>You haven't backed up your data yet.</div>
+                    <button class="btn btn-sm btn-outline" style="background:white;border-color:#FDE68A;" onclick="showPage('settings')">Settings</button>
+                </div>`;
+            } else {
+                var daysSinceBackup = (new Date() - new Date(data.lastBackupDate)) / (1000 * 60 * 60 * 24);
+                if (daysSinceBackup > 30) {
+                    backupWarningHTML = `<div class="info-box" style="margin-bottom: 16px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>Your last backup was over 30 days ago.</div>
+                        <button class="btn btn-sm btn-outline" style="background:white;border-color:#FDE68A;" onclick="showPage('settings')">Backup Now</button>
+                    </div>`;
+                }
+            }
+
+            var pendingHTML = pending.length === 0 ? 
+                `<div class="empty"><div class="empty-icon">🎉</div><p>All shops paid this month!</p></div>` : 
+                pending.map(sh => {
+                    var st = getPaymentStatus(sh.id);
+                    return `<div class="shop-card" onclick="openDetail(${sh.id})">
+                        <div class="shop-card-inner">
+                            <div class="shop-card-top">
+                                <div><div class="shop-name">${sh.name}</div><div class="shop-tenant">${sh.tenant || 'No tenant'}</div></div>
+                                <div style="text-align:right;"><div class="shop-rent">${fmtMoney(sh.rent)}</div><div class="shop-due">Due: 1st</div></div>
+                            </div>
+                        </div>
+                        <div class="shop-footer">
+                            <span class="badge ${st}">${st}</span>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                ${sh.phone ? waBtn(sh.id) : ''}
+                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openMarkPaid(${sh.id})">Record payment</button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            
+            document.getElementById('page-dashboard').innerHTML = backupWarningHTML + `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-label">Total rent / mo</div><div class="stat-value">${fmtMoney(totalRent)}</div></div>
+                    <div class="stat-card"><div class="stat-label">Collected</div><div class="stat-value green">${fmtMoney(collected)}</div></div>
+                    <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value ${pending.length > 0 ? 'red' : ''}">${pending.length} shops</div></div>
+                    <div class="stat-card"><div class="stat-label">Collection rate</div><div class="stat-value">${pct}%</div></div>
+                </div>
+                <div class="section-title">Pending payments</div>
+            ` + pendingHTML;
+        }
+
+        function renderShops() {
+            var filtered = data.shops.filter(sh => 
+                sh.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                (sh.tenant || '').toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            var html = filtered.length === 0 ? 
+                `<div class="empty"><div class="empty-icon">🏪</div><p>${data.shops.length === 0 ? 'No shops yet. Tap + to add your first shop.' : 'No results found.'}</p></div>` : 
+                filtered.map(sh => {
+                    var st = getPaymentStatus(sh.id);
+                    return `<div class="shop-card" onclick="openDetail(${sh.id})">
+                        <div class="shop-card-inner">
+                            <div class="shop-card-top">
+                                <div>
+                                    <div class="shop-name">${sh.name}</div>
+                                    <div class="shop-tenant">${sh.tenant || 'No tenant'}${sh.phone ? ' · ' + sh.phone : ''}</div>
+                                </div>
+                                <div style="text-align:right;"><div class="shop-rent">${fmtMoney(sh.rent)}</div><div class="shop-due">Due: 1st</div></div>
+                            </div>
+                        </div>
+                        <div class="shop-footer">
+                            <span class="badge ${st}">${st}</span>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                ${sh.phone ? waBtn(sh.id) : ''}
+                                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openEditShop(${sh.id})">Edit</button>
+                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openMarkPaid(${sh.id})" ${st === 'paid' ? 'disabled style="opacity:.4;"' : ''}>Pay</button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+                
+            document.getElementById('page-shops').innerHTML = `
+                <div class="search-wrap">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input class="search-input" placeholder="Search shops or tenants..." value="${searchTerm}" oninput="searchTerm=this.value;renderShops()">
+                </div>
+            ` + html;
+        }
+
+        function renderHistory() {
+            var grouped = {};
+            data.payments.forEach(p => {
+                if (!grouped[p.month]) grouped[p.month] = [];
+                grouped[p.month].push(p);
+            });
+            var months = Object.keys(grouped).sort().reverse();
+            if (months.length === 0) {
+                document.getElementById('page-history').innerHTML = '<div class="empty"><div class="empty-icon">🧾</div><p>No payments recorded yet.</p></div>';
+                return;
+            }
+            document.getElementById('page-history').innerHTML = months.map(m => {
+                var ps = grouped[m];
+                var total = ps.reduce((s, p) => s + (p.amount || 0), 0);
+                return `<div class="month-group">
+                    <div class="month-header">
+                        <div class="month-name">${monthLabel(m)}</div>
+                        <div class="month-total">${fmtMoney(total)}</div>
+                    </div>
+                    ${ps.sort((a, b) => (b.paidDate || '').localeCompare(a.paidDate || '')).map(p => {
+                        var sh = data.shops.find(s => s.id === p.shopId) || { name: 'Deleted shop', tenant: '' };
+                        return `<div class="history-item">
+                            <div>
+                                <div style="font-size:14px;font-weight:600;">${sh.name}</div>
+                                <div style="font-size:12px;color:var(--gray-400);">${sh.tenant || ''} · ${p.paidDate || ''}</div>
+                                ${p.note ? `<div style="font-size:11px;color:var(--gray-400);">${p.note}</div>` : ''}
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="font-size:16px;font-weight:700;color:var(--green);">+${fmtMoney(p.amount)}</div>
+                                <button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:11px;" onclick="generateReceipt(${p.id})">Receipt</button>
+                                <button class="delete-pay" onclick="deletePayment(${p.id})">×</button>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>`;
+            }).join('');
+        }
+
+        function openDetail(shopId) {
+            var sh = data.shops.find(s => s.id === shopId);
+            if (!sh) return;
+            var payments = data.payments.filter(p => p.shopId === shopId).sort((a, b) => b.month.localeCompare(a.month));
+            var totalPaid = payments.reduce((s, p) => s + (p.amount || 0), 0);
+            var st = getPaymentStatus(shopId);
+            
+            var paysHTML = payments.length === 0 ? '<div class="empty"><p>No payments recorded yet.</p></div>' : payments.map(p => {
+                return `<div class="pay-item">
+                    <div>
+                        <div class="pay-month">${monthLabel(p.month)}</div>
+                        <div class="pay-date">${p.paidDate || ''}${p.note ? ' · ' + p.note : ''}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div class="pay-amount">+${fmtMoney(p.amount)}</div>
+                        <button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:11px;" onclick="generateReceipt(${p.id})">Receipt</button>
+                        <button class="delete-pay" onclick="deletePayment(${p.id});openDetail(${shopId})">×</button>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            var depositHTML = sh.deposit ? `<div class="detail-stat"><div class="detail-stat-val">${fmtMoney(sh.deposit)}</div><div class="detail-stat-label">Security Deposit</div></div>` : '';
+            var leaseHTML = (sh.leaseStart || sh.leaseEnd) ? `<div style="font-size:13px; color:var(--gray-600); margin-top: 12px; background:var(--gray-50); padding: 8px; border-radius:var(--radius-sm); border:1px solid var(--gray-200);"><div style="font-weight:600; margin-bottom:4px; color:var(--gray-900);">Lease Details</div><div>${sh.leaseStart ? 'Start: ' + sh.leaseStart : ''}${sh.leaseStart && sh.leaseEnd ? ' | ' : ''}${sh.leaseEnd ? 'End: ' + sh.leaseEnd : ''}</div></div>` : '';
+            var notesHTML = sh.notes ? `<div style="font-size:13px; color:var(--gray-600); margin-top: 8px; background:var(--amber-light); padding: 8px; border-radius:var(--radius-sm); border: 1px solid #FDE68A;"><div style="font-weight:600; margin-bottom:4px; color:#92400E;">Notes</div><div style="white-space:pre-wrap; color:#92400E;">${sh.notes}</div></div>` : '';
+            var photoHTML = sh.idPhoto ? `<div style="margin-top: 12px;"><div style="font-size:13px; font-weight:600; color:var(--gray-900); margin-bottom:6px;">ID Document</div><img src="${sh.idPhoto}" style="width: 100%; max-height:200px; object-fit:cover; border-radius:var(--radius-sm); border: 1px solid var(--gray-200);" onclick="window.open('${sh.idPhoto}')"></div>` : '';
+
+            document.getElementById('page-detail').innerHTML = `
+                <button class="back-btn" onclick="showPage('shops')">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>All Shops
+                </button>
+                <div class="detail-hero">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                        <div>
+                            <div class="detail-name">${sh.name}</div>
+                            <div class="detail-sub">${sh.tenant || 'No tenant'}</div>
+                            ${sh.phone ? `<div class="detail-sub">${sh.phone}</div>` : ''}
+                        </div>
+                        <span class="badge ${st}">${st}</span>
+                    </div>
+                    ${leaseHTML}
+                    ${notesHTML}
+                    ${photoHTML}
+                    <div class="detail-stats">
+                        <div class="detail-stat"><div class="detail-stat-val">${fmtMoney(sh.rent)}</div><div class="detail-stat-label">Monthly rent</div></div>
+                        ${depositHTML}
+                        <div class="detail-stat"><div class="detail-stat-val" style="color:var(--green);">${fmtMoney(totalPaid)}</div><div class="detail-stat-label">Total collected</div></div>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" style="flex:1;" onclick="openMarkPaid(${shopId})" ${st === 'paid' ? 'disabled style="opacity:.4;"' : ''}>Record payment</button>
+                        ${sh.phone ? `<button class="btn btn-wa" onclick="openWA(${shopId})"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg> Remind</button>` : ''}
+                        <button class="btn btn-outline" onclick="openEditShop(${shopId})">Edit</button>
+                    </div>
+                </div>
+                <div class="section-title">Payment history</div>
+                ${paysHTML}
+            `;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-detail').classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('nav-shops').classList.add('active');
+            document.getElementById('fab').style.display = 'none';
+        }
+
+        function handlePhotoUpload(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    var max_size = 800; // Compress image
+                    var width = img.width;
+                    var height = img.height;
+                    if (width > height) {
+                        if (width > max_size) { height *= max_size / width; width = max_size; }
+                    } else {
+                        if (height > max_size) { width *= max_size / height; height = max_size; }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    // Compress to JPEG 0.5 quality
+                    currentIdPhotoBase64 = canvas.toDataURL('image/jpeg', 0.5);
+                    document.getElementById('id-photo-preview').src = currentIdPhotoBase64;
+                    document.getElementById('id-photo-preview').style.display = 'block';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function openAddShop() {
+            editingShopId = null;
+            document.getElementById('modal-shop-title').textContent = 'Add Shop';
+            ['f-name', 'f-tenant', 'f-phone', 'f-rent', 'f-lease-start', 'f-lease-end', 'f-deposit', 'f-notes', 'f-photo-input'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            currentIdPhotoBase64 = null;
+            document.getElementById('id-photo-preview').style.display = 'none';
+            document.getElementById('delete-shop-btn').style.display = 'none';
+            document.getElementById('modal-shop').classList.add('open');
+        }
+
+        function openEditShop(shopId) {
+            var sh = data.shops.find(s => s.id === shopId);
+            if (!sh) return;
+            editingShopId = shopId;
+            document.getElementById('modal-shop-title').textContent = 'Edit Shop';
+            document.getElementById('f-name').value = sh.name || '';
+            document.getElementById('f-tenant').value = sh.tenant || '';
+            document.getElementById('f-phone').value = sh.phone || '';
+            document.getElementById('f-rent').value = sh.rent || '';
+            document.getElementById('f-lease-start').value = sh.leaseStart || '';
+            document.getElementById('f-lease-end').value = sh.leaseEnd || '';
+            document.getElementById('f-deposit').value = sh.deposit || '';
+            document.getElementById('f-notes').value = sh.notes || '';
+            document.getElementById('f-photo-input').value = '';
+            
+            currentIdPhotoBase64 = sh.idPhoto || null;
+            if (currentIdPhotoBase64) {
+                document.getElementById('id-photo-preview').src = currentIdPhotoBase64;
+                document.getElementById('id-photo-preview').style.display = 'block';
+            } else {
+                document.getElementById('id-photo-preview').style.display = 'none';
+            }
+            
+            document.getElementById('delete-shop-btn').style.display = 'block';
+            document.getElementById('modal-shop').classList.add('open');
+        }
+
+        function saveShop() {
+            var name = document.getElementById('f-name').value.trim();
+            if (!name) { alert('Please enter a shop name.'); return; }
+            var shop = {
+                name: name,
+                tenant: document.getElementById('f-tenant').value.trim(),
+                phone: document.getElementById('f-phone').value.trim().replace(/\s+/g, ''),
+                rent: parseInt(document.getElementById('f-rent').value) || 0,
+                leaseStart: document.getElementById('f-lease-start').value,
+                leaseEnd: document.getElementById('f-lease-end').value,
+                deposit: parseInt(document.getElementById('f-deposit').value) || 0,
+                notes: document.getElementById('f-notes').value.trim(),
+                idPhoto: currentIdPhotoBase64
+            };
+            
+            if (editingShopId) {
+                var idx = data.shops.findIndex(s => s.id === editingShopId);
+                if (idx >= 0) data.shops[idx] = Object.assign({}, data.shops[idx], shop);
+            } else {
+                data.shops.push(Object.assign({ id: data.nextId++ }, shop));
+            }
+            saveData();
+            closeModal('modal-shop');
+            renderPage(currentPage === 'detail' ? 'shops' : currentPage);
+            if (currentPage === 'detail') openDetail(editingShopId || (data.nextId - 1));
+        }
+
+        function deleteShop() {
+            if (!confirm('Delete this shop and all its payment records?')) return;
+            data.shops = data.shops.filter(s => s.id !== editingShopId);
+            data.payments = data.payments.filter(p => p.shopId !== editingShopId);
+            saveData();
+            closeModal('modal-shop');
+            showPage('shops');
+        }
+
+        function openMarkPaid(shopId) {
+            payingShopId = shopId;
+            var sh = data.shops.find(s => s.id === shopId);
+            document.getElementById('modal-payment-shop').textContent = sh ? sh.name : '';
+            document.getElementById('p-month').value = getCurrentMonth();
+            document.getElementById('p-amount').value = sh ? sh.rent : '';
+            document.getElementById('p-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('p-note').value = '';
+            document.getElementById('modal-payment').classList.add('open');
+        }
+
+        function savePayment() {
+            var month = document.getElementById('p-month').value.trim();
+            var amount = parseInt(document.getElementById('p-amount').value) || 0;
+            var paidDate = document.getElementById('p-date').value;
+            var note = document.getElementById('p-note').value.trim();
+            if (!month || !paidDate) { alert('Please fill in all fields.'); return; }
+            if (data.payments.find(p => p.shopId === payingShopId && p.month === month)) {
+                alert('Payment already recorded for this month!');
+                return;
+            }
+            data.payments.push({ id: data.nextId++, shopId: payingShopId, month: month, amount: amount, paidDate: paidDate, note: note });
+            saveData();
+            closeModal('modal-payment');
+            renderPage(currentPage);
+            if (currentPage === 'detail') openDetail(payingShopId);
+        }
+
+        function deletePayment(id) {
+            if (!confirm('Remove this payment record?')) return;
+            data.payments = data.payments.filter(p => p.id !== id);
+            saveData();
+            renderPage(currentPage);
+            if (currentPage === 'detail') {
+                var shId = document.querySelector('.detail-hero button')?.getAttribute('onclick')?.match(/\d+/)?.[0];
+                if (shId) openDetail(parseInt(shId));
+            }
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        function openWA(shopId) {
+            waShopId = shopId;
+            var sh = data.shops.find(s => s.id === shopId);
+            if (!sh) return;
+            var cm = getCurrentMonth();
+            var mf = monthFull(cm);
+            var msg = `Dear ${sh.tenant || 'Tenant'},\n\nThis is a friendly reminder that your monthly rent of ₹${Number(sh.rent).toLocaleString('en-IN')} for *${sh.name}* is due on *1st ${mf}*.\n\nKindly make the payment at your earliest convenience.\n\nThank you! 🙏`;
+            document.getElementById('wa-shop-info').textContent = sh.name + (sh.phone ? ' · +' + sh.phone : '');
+            document.getElementById('wa-message').value = msg;
+            document.getElementById('modal-wa').classList.add('open');
+        }
+
+        function sendWA() {
+            var sh = data.shops.find(s => s.id === waShopId);
+            if (!sh || !sh.phone) return;
+            var msg = document.getElementById('wa-message').value;
+            var phone = sh.phone.replace(/\D/g, '');
+            window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+            closeModal('modal-wa');
+        }
+
+        function exportCSV() {
+            var rows = [['Shop', 'Tenant', 'Month', 'Amount (INR)', 'Paid Date', 'Note']];
+            data.payments.forEach(p => {
+                var sh = data.shops.find(s => s.id === p.shopId) || { name: '', tenant: '' };
+                rows.push([sh.name, sh.tenant || '', p.month, p.amount, p.paidDate || '', p.note || '']);
+            });
+            var csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+            var a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            a.download = 'rent_history_' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+        }
+
+        function exportJSON() {
+            data.lastBackupDate = new Date().toISOString();
+            saveData();
+            var json = JSON.stringify(data);
+            var a = document.createElement('a');
+            a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
+            a.download = 'rent_manager_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            if (currentPage === 'dashboard') renderDashboard();
+            alert('Backup successful!');
+        }
+
+        function importJSON(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var imported = JSON.parse(e.target.result);
+                    if (imported.shops && imported.payments) {
+                        data = imported;
+                        saveData();
+                        alert('Data restored successfully!');
+                        showPage('dashboard');
+                    } else {
+                        alert('Invalid backup file. Missing shops or payments.');
+                    }
+                } catch (err) {
+                    alert('Error parsing JSON file. Is it corrupted?');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(el => {
+            el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+        });
+
+        loadData();
+        showPage('dashboard');
+    </script>
+</body>
+</html>

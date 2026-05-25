@@ -378,7 +378,7 @@ button { font-family: var(--font-sans); cursor: pointer; transition: all 0.2s ea
 
     <div style="font-size:13px;font-weight:600;margin-bottom:12px">Upload Payment Screenshot</div>
     <div class="two-col">
-      <div class="form-group"><label>Amount Paid (₹)</label><input id="sp-amt" type="number"></div>
+      <div class="form-group"><label>Amount Paid (₹)</label><input id="sp-amt" type="number" readonly style="background:#f1f5f9;color:var(--color-text-secondary);cursor:not-allowed"><div id="sp-note" style="font-size:12px;color:#dc2626;margin-top:4px;display:none;line-height:1.2"></div></div>
       <div class="form-group"><label>Date</label><input id="sp-date" type="date"></div>
     </div>
     <div class="form-group">
@@ -484,7 +484,10 @@ auth.onAuthStateChanged(user => {
     document.getElementById('app').style.display = 'block';
     
     // Fetch my shop
-    db.collection('shops').where('tenantEmail', '==', user.email).onSnapshot(snap => {
+    let searchPhone = user.phoneNumber;
+    if (searchPhone && searchPhone.startsWith('+91')) searchPhone = searchPhone.substring(3);
+    
+    db.collection('shops').where('phone', '==', searchPhone).onSnapshot(snap => {
       if (!snap.empty) {
         myShop = {id: snap.docs[0].id, ...snap.docs[0].data()};
         document.getElementById('t-name').textContent = myShop.tenant;
@@ -510,7 +513,7 @@ auth.onAuthStateChanged(user => {
       } else {
         document.getElementById('t-name').textContent = 'No Shop Found';
         document.getElementById('t-bal').textContent = '-';
-        document.getElementById('t-due').textContent = 'No shop is assigned to this email.';
+        document.getElementById('t-due').textContent = 'No shop is assigned to this phone number.';
       }
     });
   } else {
@@ -527,7 +530,18 @@ let tempProofBase64 = null;
 function openSubmitPayment() {
   if(!myShop) return;
   const bal = myShop.rent - (myPayments.filter(p => p.month === monthKey && p.status !== 'pending').reduce((a,p)=>a+p.amount,0));
-  const defaultAmt = bal > 0 ? bal : myShop.rent;
+  let defaultAmt = bal > 0 ? bal : myShop.rent;
+  
+  const today = now.getDate();
+  if (today > myShop.dueDay && bal > 0) {
+    const lateDays = today - myShop.dueDay;
+    const lateFee = lateDays * 50; // Rs 50 per day
+    defaultAmt += lateFee;
+    document.getElementById('sp-note').textContent = `Includes ₹${lateFee} late fee (${lateDays} days)`;
+    document.getElementById('sp-note').style.display = 'block';
+  } else {
+    document.getElementById('sp-note').style.display = 'none';
+  }
   
   document.getElementById('sp-amt').value = defaultAmt;
   document.getElementById('sp-date').value = now.toISOString().split('T')[0];

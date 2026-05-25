@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    // Bulletproof cache buster
+    (function(){
+      var currentVersion = "1779733069";
+      var cachedVersion = localStorage.getItem("app_version");
+      if(cachedVersion !== currentVersion) {
+        localStorage.setItem("app_version", currentVersion);
+        if(window.location.search.indexOf("v=") === -1) {
+          var separator = window.location.href.indexOf('?') === -1 ? '?' : '&';
+          window.location.replace(window.location.href + separator + "v=" + currentVersion);
+        }
+      }
+    })();
+  </script>
+
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">

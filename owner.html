@@ -820,7 +820,7 @@ function renderDashboard(){
 function renderShops(filter=''){
   const list = document.getElementById('shops-list');
   const fl = filter.toLowerCase();
-  const filtered = shops.filter(s=>!fl||s.name.toLowerCase().includes(fl)||s.tenant.toLowerCase().includes(fl));
+  const filtered = shops.filter(s=>!fl||(s.name||'').toLowerCase().includes(fl)||(s.tenant||'').toLowerCase().includes(fl));
   if(!filtered.length){list.innerHTML='<div class="empty">No shops found.</div>';return;}
   list.innerHTML = filtered.map(s=>{
     const {status,paid}=getStatus(s);

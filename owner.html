@@ -321,6 +321,17 @@ button { font-family: var(--font-sans); cursor: pointer; transition: all 0.2s ea
 
   <div id="settings" class="section">
     <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem">Data Management</div>
+    
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem;margin-top:1.5rem">Payment Configuration</div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:8px">UPI ID (For Tenant Payments)</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px">Enter your UPI ID so tenants can easily scan and pay their rent.</div>
+      <div class="form-group" style="display:flex;gap:8px;margin-bottom:0">
+        <input type="text" id="settings-upi" placeholder="e.g. yourname@sbi" style="margin-bottom:0">
+        <button class="btn btn-primary" onclick="saveUpiId()" id="btn-save-upi">Save</button>
+      </div>
+    </div>
+
     <div class="card">
       <div style="font-weight:600;margin-bottom:8px">Backup Data</div>
       <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px">Download a copy of your shops and payment history. Keep this safe.</div>
@@ -437,6 +448,17 @@ function doLogin() {
   });
 }
 
+
+function saveUpiId() {
+  const upi = document.getElementById('settings-upi').value.trim();
+  const btn = document.getElementById('btn-save-upi');
+  btn.textContent = 'Saving...';
+  db.collection('settings').doc('owner').set({ upiId: upi }, { merge: true }).then(() => {
+    btn.textContent = 'Saved!';
+    setTimeout(() => { btn.textContent = 'Save'; }, 2000);
+  });
+}
+
 function doLogout() {
   auth.signOut();
 }
@@ -450,9 +472,23 @@ const monthKey = `${curYear}-${String(curMonth+1).padStart(2,'0')}`;
 let shops = [];
 let payments = [];
 
+
+let ownerSettings = { upiId: '' };
+
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('login-screen').style.display = 'none';
+    
+    // Load Settings
+    db.collection('settings').doc('owner').onSnapshot(snap => {
+      if(snap.exists) {
+        ownerSettings = snap.data();
+        if(document.getElementById('settings-upi')) {
+            document.getElementById('settings-upi').value = ownerSettings.upiId || '';
+        }
+      }
+    });
+
     
     db.collection('shops').onSnapshot(snap => {
       shops = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));

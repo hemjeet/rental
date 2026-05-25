@@ -282,7 +282,7 @@ button { font-family: var(--font-sans); cursor: pointer; transition: all 0.2s ea
     <div style="font-size:13px;color:var(--color-text-secondary);font-weight:500;margin-bottom:4px">Current Outstanding Balance</div>
     <div style="font-size:36px;font-weight:700;color:var(--color-primary);margin-bottom:8px" id="t-bal">₹0</div>
     <div id="t-due" style="font-size:14px;color:var(--color-text-secondary);margin-bottom:1rem">Due Date: ...</div>
-    <button class="btn btn-primary" onclick="openSubmitPayment()" style="width:100%;max-width:200px"><i class="ti ti-upload" aria-hidden="true"></i> Submit Payment Proof</button>
+    <button class="btn btn-primary" onclick="openSubmitPayment()" style="width:100%;max-width:200px"><i class="ti ti-upload" aria-hidden="true"></i> Pay Rent</button>
   </div>
 
   <div style="font-size:15px;font-weight:600;margin-top:2rem;margin-bottom:1rem">Payment History</div>
@@ -292,15 +292,57 @@ button { font-family: var(--font-sans); cursor: pointer; transition: all 0.2s ea
 </div>
 
 
+  </div>
+
+  <div id="t-profile" class="section" style="display:none">
+    <div class="card" style="background:white;border-radius:var(--border-radius-lg);padding:1.5rem;box-shadow:var(--shadow-sm);border:1px solid var(--color-border)">
+      <h3 style="margin-bottom:1rem;color:var(--color-text-primary)">Lease Details</h3>
+      
+      <div style="margin-bottom:12px">
+        <div style="font-size:12px;color:var(--color-text-secondary)">Tenant Name</div>
+        <div style="font-weight:600" id="prof-tenant">-</div>
+      </div>
+      
+      <div style="margin-bottom:12px">
+        <div style="font-size:12px;color:var(--color-text-secondary)">Phone Number</div>
+        <div style="font-weight:600" id="prof-phone">-</div>
+      </div>
+      
+      <div style="margin-bottom:12px">
+        <div style="font-size:12px;color:var(--color-text-secondary)">Monthly Rent</div>
+        <div style="font-weight:600" id="prof-rent">-</div>
+      </div>
+      
+      <div style="margin-bottom:12px">
+        <div style="font-size:12px;color:var(--color-text-secondary)">Due Date</div>
+        <div style="font-weight:600" id="prof-due">-</div>
+      </div>
+      
+      <div id="prof-doc-container" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--color-border)">
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">Lease Document / ID</div>
+        <img id="prof-doc-img" style="width:100%;border-radius:8px;border:1px solid var(--color-border)">
+      </div>
+    </div>
+  </div>
+
 <div id="modal-submit-payment" style="display:none" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
-  <div class="modal">
-    <h3>Submit Payment Proof</h3>
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <h3>Pay Rent</h3>
+    
+    <div id="upi-section" style="display:none;text-align:center;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px dashed var(--color-border)">
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px">Pay directly via UPI</div>
+      <img id="upi-qr" src="" style="width:200px;height:200px;border-radius:8px;margin-bottom:12px;border:1px solid var(--color-border)">
+      <br>
+      <a id="upi-link" href="#" class="btn btn-primary" style="text-decoration:none;display:inline-flex;width:100%;justify-content:center"><i class="ti ti-device-mobile"></i> Open UPI App</a>
+    </div>
+
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px">Upload Payment Screenshot</div>
     <div class="two-col">
       <div class="form-group"><label>Amount Paid (₹)</label><input id="sp-amt" type="number"></div>
       <div class="form-group"><label>Date</label><input id="sp-date" type="date"></div>
     </div>
     <div class="form-group">
-      <label>Upload Screenshot (UPI / Receipt)</label>
+      <label>Upload Screenshot</label>
       <input type="file" id="sp-doc" accept="image/*" onchange="handleProof(event)">
       <div id="sp-preview" style="margin-top:8px;display:none;">
         <img id="sp-img" style="width:100%;border-radius:var(--border-radius-sm);border:1px solid var(--color-border);max-height:200px;object-fit:contain;background:#f8fafc">
@@ -309,7 +351,7 @@ button { font-family: var(--font-sans); cursor: pointer; transition: all 0.2s ea
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
       <button class="btn" onclick="document.getElementById('modal-submit-payment').style.display='none'">Cancel</button>
-      <button class="btn btn-primary" id="btn-submit-proof" onclick="submitPayment()">Submit for Approval</button>
+      <button class="btn btn-primary" id="btn-submit-proof" onclick="submitPayment()">Submit Proof</button>
     </div>
   </div>
 </div>
@@ -373,9 +415,28 @@ function doRegister() {
   });
 }
 
+
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.style.background = 'transparent';
+    t.style.color = 'var(--color-text-secondary)';
+  });
+  el.style.background = 'var(--color-primary)';
+  el.style.color = 'white';
+  
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+}
+
 function doLogout() {
   auth.signOut();
 }
+
+
+let ownerSettings = { upiId: '' };
+db.collection('settings').doc('owner').onSnapshot(snap => {
+  if (snap.exists) ownerSettings = snap.data();
+});
 
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -412,9 +473,23 @@ auth.onAuthStateChanged(user => {
 let tempProofBase64 = null;
 
 function openSubmitPayment() {
-  document.getElementById('sp-amt').value = '';
+  if(!myShop) return;
+  const bal = myShop.rent - (myPayments.filter(p => p.month === monthKey && p.status !== 'pending').reduce((a,p)=>a+p.amount,0));
+  const defaultAmt = bal > 0 ? bal : myShop.rent;
+  
+  document.getElementById('sp-amt').value = defaultAmt;
   document.getElementById('sp-date').value = now.toISOString().split('T')[0];
   clearProof();
+  
+  if (ownerSettings && ownerSettings.upiId) {
+    const upiLink = `upi://pay?pa=${ownerSettings.upiId}&pn=Landlord&am=${defaultAmt}`;
+    document.getElementById('upi-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
+    document.getElementById('upi-link').href = upiLink;
+    document.getElementById('upi-section').style.display = 'block';
+  } else {
+    document.getElementById('upi-section').style.display = 'none';
+  }
+  
   document.getElementById('modal-submit-payment').style.display = 'flex';
 }
 
